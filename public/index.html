@@ -1,43 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Web site created using create-react-app" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <title>AI Yuri</title>
+</head>
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+  <!-- <script src="
+https://cdn.jsdelivr.net/npm/extendable-media-recorder@9.2.2/build/es5/bundle.min.js
+"></script> -->
+  <script type="module">
+	import { MediaRecorder, register } from 'https://cdn.jsdelivr.net/npm/extendable-media-recorder@9.2.2/+esm'
+	import { connect } from 'https://cdn.jsdelivr.net/npm/extendable-media-recorder-wav-encoder@7.0.109/+esm'
+	// import { MediaRecorder, register } from 'https://cdn.jsdelivr.net/npm/extendable-media-recorder@latest/dist/index.min.js';
+    // // Импорт библиотеки extendable-media-recorder-wav-encoder
+    // import { connect } from 'https://cdn.jsdelivr.net/npm/extendable-media-recorder-wav-encoder@latest/dist/index.min.js';
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'ru-RU';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 0;
+    let isRecording = false;
+    let mediaRecorder;
+    let audioChunks = [];
+	let isCodecRegistered = false;
+	let analyser = null;
+	let dataArray = null
+	
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    recognition.onstart = function() {
+      console.log('Голосовое распознавание активировано. Начните говорить.');
+    };
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+	async function initAudioAnalyser(stream) {
+      let audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 128;
+      source.connect(analyser);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+    }
+
+	function getVolume() {
+      analyser.getByteFrequencyData(dataArray);
+	  console.log(dataArray);
+      let sum = dataArray.reduce((a, b) => a + b, 0);
+      return sum / dataArray.length;
+    }
+
+    recognition.onresult = function(event) {
+      const lastResultIndex = event.results.length - 1;
+      const speechResult = event.results[lastResultIndex][0].transcript;
+      console.log('Результат: ' + speechResult);
+      if (!isRecording) {
+        recognition.start();
+	  startRecording();
+		
+      }
+    };
+
+    recognition.onend = function() {
+      if (isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        console.log('Запись остановлена.');
+      }
+     recognition.start();
+	startRecording();
+    };
+
+    async function startRecording() {
+		if (!isCodecRegistered) {
+			await register(await connect());
+			isCodecRegistered = true;
+		}
+	  
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(async function(stream) {
+			if (stream){
+				console.log('Получен аудио поток.');
+			}
+			await initAudioAnalyser(stream);
+          mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
+          mediaRecorder.start();
+          isRecording = true;
+          console.log('Запись началась.');
+
+          mediaRecorder.ondataavailable = function(e) {
+            audioChunks.push(e.data);
+            if (mediaRecorder.state === 'inactive') {
+				let volume = getVolume(); // Получаем уровень громкости
+				let threshold = 5; // Пороговое значение громкости
+				console.log('Громкость: ' + volume);
+				if (volume > threshold) {
+                let audioBlob = new Blob(audioChunks, { 'type' : 'audio/wav; codecs=opus' });
+                sendAudioToServer(audioBlob); // Отправляем, если громкость выше порога
+				};
+				
+				// let audioBlob = new Blob(audioChunks, { 'type' : 'audio/wav; codecs=opus' });
+                // sendAudioToServer(audioBlob); // Отправляем, если громкость выше порога
+              audioChunks = [];
+            }
+          };
+        })
+        .catch(function(err) {
+          console.log('Ошибка при получении аудио потока: ' + err);
+        });
+    }
+
+    async function sendAudioToServer(blob) {
+      let formData = new FormData();
+	  let data = null;
+      formData.append('file', blob, 'audio.wav');
+
+      const response =  await fetch('http://localhost:8000/api/v1/site/recognize',  {
+                        method: 'POST',
+                        body: formData,
+                        headers: {'Access-Control-Allow-Origin': '*'},
+                        // mode: 'no-cors',
+                    });
+                    // .then(response => response.json())
+                    // .then(data => console.log(data));
+					console.log('Успешно отправлено:', response);
+                    data = await response.json();
+                    console.log('Успешно отправлено:', data);
+                if (data.command === "MainPage") {
+                    window.location.href = '/';
+                } 
+
+                if (data.command === "Help") {
+                    window.location.href = '/contacts';
+                } 
+
+                if (data.command === "Yuri") {
+                    window.location.href = '/projects';
+                } 
+
+                if (data.command === "Restart") {
+                    window.location.reload();
+                } 
+
+                if (data.command === "Back") {
+                    window.history.back();
+                } 
+
+				if (!isRecording) {
+					recognition.start();
+	  startRecording();
+      }
+			}
+
+
+    window.onload = function() {
+      recognition.start();
+	  startRecording();
+    };
+  </script>
+</body>
 </html>
