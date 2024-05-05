@@ -1,0 +1,71 @@
+{
+  "version": "0.1.0",
+  "name": "ai-site",
+  "dependencies": {
+    "@testing-library/jest-dom": {
+      "version": "5.17.0",
+      "resolved": "https://registry.npmjs.org/@testing-library/jest-dom/-/jest-dom-5.17.0.tgz",
+      "overridden": false
+    },
+    "@testing-library/react": {
+      "version": "13.4.0",
+      "resolved": "https://registry.npmjs.org/@testing-library/react/-/react-13.4.0.tgz",
+      "overridden": false
+    },
+    "@testing-library/user-event": {
+      "version": "13.5.0",
+      "resolved": "https://registry.npmjs.org/@testing-library/user-event/-/user-event-13.5.0.tgz",
+      "overridden": false
+    },
+    "extendable-media-recorder-wav-encoder": {
+      "version": "7.0.109",
+      "resolved": "https://registry.npmjs.org/extendable-media-recorder-wav-encoder/-/extendable-media-recorder-wav-encoder-7.0.109.tgz",
+      "overridden": false
+    },
+    "extendable-media-recorder": {
+      "version": "9.2.2",
+      "resolved": "https://registry.npmjs.org/extendable-media-recorder/-/extendable-media-recorder-9.2.2.tgz",
+      "overridden": false
+    },
+    "react-audio-voice-recorder": {
+      "version": "2.2.0",
+      "resolved": "https://registry.npmjs.org/react-audio-voice-recorder/-/react-audio-voice-recorder-2.2.0.tgz",
+      "overridden": false
+    },
+    "react-dom": {
+      "version": "18.3.1",
+      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz",
+      "overridden": false
+    },
+    "react-icons": {
+      "version": "5.1.0",
+      "resolved": "https://registry.npmjs.org/react-icons/-/react-icons-5.1.0.tgz",
+      "overridden": false
+    },
+    "react-router-dom": {
+      "version": "6.23.0",
+      "resolved": "https://registry.npmjs.org/react-router-dom/-/react-router-dom-6.23.0.tgz",
+      "overridden": false
+    },
+    "react-scripts": {
+      "version": "5.0.1",
+      "resolved": "https://registry.npmjs.org/react-scripts/-/react-scripts-5.0.1.tgz",
+      "overridden": false
+    },
+    "react-speech-recognition": {
+      "version": "3.10.0",
+      "resolved": "https://registry.npmjs.org/react-speech-recognition/-/react-speech-recognition-3.10.0.tgz",
+      "overridden": false
+    },
+    "react": {
+      "version": "18.3.1",
+      "resolved": "https://registry.npmjs.org/react/-/react-18.3.1.tgz",
+      "overridden": false
+    },
+    "web-vitals": {
+      "version": "2.1.4",
+      "resolved": "https://registry.npmjs.org/web-vitals/-/web-vitals-2.1.4.tgz",
+      "overridden": false
+    }
+  }
+}

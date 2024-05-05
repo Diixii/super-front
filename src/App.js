@@ -10,14 +10,14 @@ import Contacts from './pages/Contacts';
 import Project from './pages/Project';
 
 import ScrollToTop from './utils/ScrollToTop';
-// import Recorder from './components/reco/Recorder';
+import Recorder_2 from './components/reco/Recorder_2';
 
 function App() {
   return (
     <div className="App">
 
 	  	<Router>
-			{/* <Recorder /> */}
+			<Recorder_2 />
 			<ScrollToTop />
 		  	<Navbar />
 			<Routes>
